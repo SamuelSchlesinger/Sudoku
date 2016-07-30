@@ -4,6 +4,8 @@ import Control.Monad.Trans (liftIO)
 import Control.Monad (forM, void, (=<<))
 import System.IO.Unsafe
 import Control.Arrow (first)
+import Data.Char (intToDigit)
+import Data.Traversable (for)
 import Data.Maybe (isJust, fromJust, isNothing)
 
 compose :: Eq a => [(a, b)] -> [a] -> [b]
@@ -18,6 +20,10 @@ checkBoard board = range && distinct where
     domain <- [quadrants, rows, cols]
     realm <- domain
     pure $ compose (map (first place) board) realm 
+
+prettyBoard :: [((Int, Int), Integer)] -> String
+prettyBoard xs 
+  = concat [[maybe ' ' (\c -> intToDigit $ fromInteger c) (lookup (i, j) xs)  | j <- [0..8]] ++ "\n" | i <- [0..8]]
 
 -- | A bijection Z2[9,9] -> Z[81]
 place :: (Int, Int) -> Int
@@ -88,7 +94,7 @@ mainLogic as = do
       liftIO $ print "Checking board..."
       liftIO $ print $ checkBoard $ zip (map unplace board) is
       liftIO $ print "Printing board:"
-      liftIO $ print $ zip (map unplace board) is
+      liftIO $ putStrLn $ prettyBoard $ zip (map unplace board) is
 
 main = do
   evalZ3 $ mainLogic []
